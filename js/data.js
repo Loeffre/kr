@@ -3,7 +3,7 @@ const archiveMeta = {
   classification: 'RESTRICTED',
   fileStatus: 'PARTIAL',
   notices: ['Данный архив доступен лишь высшиму эшелону', 'Объект находится под наблюдением.'],
-  intro: 'Помните Совет охроняет вас.'
+  intro: 'Помните Совет охраняет вас.'
 };
 
 const tabs = [
