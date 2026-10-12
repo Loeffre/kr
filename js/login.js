@@ -43,6 +43,7 @@ function rememberSession(account) {
 function forgetSession() {
   try {
     sessionStorage.removeItem(ACCESS_KEY);
+    sessionStorage.removeItem('archive-tech-notice');
   } catch (error) {
     return;
   }
@@ -60,6 +61,9 @@ function unlock() {
   document.body.classList.remove('is-locked');
   loginScreen.classList.add('is-granted');
   setTimeout(() => loginScreen.remove(), GRANTED_MS);
+  setTimeout(() => {
+    if (typeof maybeShowTechNotice === 'function') maybeShowTechNotice();
+  }, GRANTED_MS);
 }
 
 function deny() {
