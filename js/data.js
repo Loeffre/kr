@@ -197,5 +197,23 @@ const documents = [
         blocks: [{ t: 'empty' }]
       }
     ]
+  },
+    {
+    id: 'DOC-002',
+    title: 'Название документа',
+    date: 'UNKNOWN',
+    classification: 'RESTRICTED',
+    status: 'STORED',
+    summary: 'Короткое описание для главной вкладки.',
+    sections: [
+      {
+        title: 'Название раздела',
+        blocks: [
+          { t: 'p', text: 'Обычный абзац.' },
+          { t: 'h', text: 'Подзаголовок' },
+          { t: 'ul', lead: 'Вступление к списку:', items: ['Первый пункт.', 'Второй пункт.'] }
+        ]
+      }
+    ]
   }
 ];
