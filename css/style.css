@@ -588,3 +588,50 @@ body.theme-full .tech-note { background: rgba(66,12,26,0.4); border-color: rgba(
 .tech-popup-ok:hover { background: #fff; color: #8f0d22; }
 .tech-popup-ok:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 @media (max-width: 640px) { .tech-popup-box { padding: 22px 20px; } }
+
+/* ===== папки изображений: группы во вкладке VISUAL EVIDENCE ===== */
+.evidence-groups { display: flex; flex-direction: column; gap: 46px; max-width: 980px; margin: 0 auto; }
+.evidence-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--electric); }
+.evidence-title { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); }
+.evidence-path { font-size: 0.66rem; letter-spacing: 0.14em; color: var(--steel); }
+.evidence-link { margin-left: auto; min-height: 36px; padding: 0 12px; font-size: 0.62rem; letter-spacing: 0.2em; color: var(--accent-text); border: 1px solid rgba(var(--accent-rgb),0.55); transition: background 0.25s, color 0.25s; }
+.evidence-link:hover { background: var(--electric); color: #fff; }
+body.theme-full .evidence-head { border-bottom-color: var(--c-wine); }
+body.theme-full .evidence-link { border-color: var(--c-steel); }
+body.theme-full .evidence-link:hover { background: var(--c-red); border-color: var(--c-red); }
+
+/* ===== карта столицы с приближением ===== */
+.map-block { margin: 18px 0 22px; }
+.map-holder { position: relative; }
+.map {
+  position: relative; border: 1px solid rgba(var(--accent-rgb),0.55); background: var(--ice);
+  box-shadow: inset 0 0 18px rgba(var(--accent-rgb),0.1);
+}
+.map-viewport { position: relative; height: min(440px, 64vh); overflow: hidden; cursor: grab; touch-action: none; user-select: none; outline: none; }
+.map-viewport.is-grabbing { cursor: grabbing; }
+.map-viewport:focus-visible { box-shadow: inset 0 0 0 2px var(--electric); }
+.map-img { position: absolute; left: 0; top: 0; max-width: none; max-height: none; transform-origin: 0 0; will-change: transform; pointer-events: none; }
+.map-controls { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 2; }
+.map-btn {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 1.15rem; line-height: 1;
+  color: var(--on-dark); background: var(--panel); border: 1px solid rgba(var(--accent-rgb),0.7); transition: background 0.25s, color 0.25s;
+}
+.map-btn:hover { background: var(--electric); border-color: var(--electric); color: #fff; }
+.map-btn:focus-visible { outline: 2px solid var(--electric); outline-offset: 2px; }
+.map-zoom-wrap { position: absolute; left: 10px; bottom: 10px; z-index: 2; pointer-events: none; }
+.map-zoom { padding: 4px 8px; font-size: 0.66rem; letter-spacing: 0.16em; color: var(--on-dark); background: var(--panel); border: 1px solid rgba(var(--accent-rgb),0.5); }
+.map-caption { margin-top: 8px; font-size: 0.62rem; letter-spacing: 0.14em; color: var(--steel); overflow-wrap: anywhere; }
+.map-pending {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 260px; padding: 16px; text-align: center;
+  font-size: 0.7rem; letter-spacing: 0.2em; color: var(--steel); border: 1px dashed rgba(var(--accent-rgb),0.7);
+  background-image: repeating-linear-gradient(45deg, rgba(var(--accent-rgb),0.08) 0 6px, transparent 6px 12px);
+}
+.map-pending-path { font-size: 0.62rem; letter-spacing: 0.1em; overflow-wrap: anywhere; }
+.map-redacted { display: flex; align-items: center; justify-content: center; min-height: 260px; padding: 16px; text-align: center; font-size: 0.7rem; letter-spacing: 0.2em; color: #8b8b8b; background: #000; }
+body.theme-full .map { background: rgba(66,12,26,0.35); border-color: rgba(136,50,64,0.8); }
+body.theme-full .map-btn { border-color: var(--c-steel); }
+body.theme-full .map-btn:hover { background: var(--c-red); border-color: var(--c-red); }
+
+.map-overlay .map-stage { position: absolute; inset: 56px 12px 12px; }
+.map-overlay .map.is-large, .map-overlay .map.is-large .map-viewport { height: 100%; }
+@media (max-width: 640px) { .map-viewport { height: min(360px, 60vh); } }
