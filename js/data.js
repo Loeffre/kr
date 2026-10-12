@@ -202,7 +202,7 @@ const documents = [
     id: 'DOC-002',
     title: 'Скоро будет...',
     date: '67676767',
-    classification: 'аустизм',
+    classification: 'аутизм',
     status: 'задержка в развитии',
     summary: 'бебеб я трудоголик',
     sections: [
