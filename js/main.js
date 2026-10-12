@@ -32,12 +32,22 @@ function renderBlocks(blocks, parent) {
       const list = el('ul');
       block.items.forEach((item) => add(list, el('li', null, item)));
       add(parent, list);
+    } else if (block.t === 'fields') {
+      add(parent, fieldsBlock(block));
     } else if (block.t === 'restricted') {
       add(parent, restrictedBlock(block));
     } else {
       add(parent, el('p', 'doc-empty', 'RECORD INCOMPLETE // ДАННЫЕ ОТСУТСТВУЮТ'));
     }
   });
+}
+
+function fieldsBlock(block) {
+  const card = el('div', 'doc-fields');
+  if (block.title) add(card, el('span', 'doc-fields-title', block.title));
+  const list = el('dl', 'doc-fields-list');
+  block.items.forEach((item) => add(list, add(el('div', 'doc-field'), el('dt', null, item.label), el('dd', null, item.value))));
+  return add(card, list);
 }
 
 function restrictedBlock(block, documentId) {
