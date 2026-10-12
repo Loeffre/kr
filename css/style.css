@@ -554,3 +554,37 @@ body.has-viewer { overflow: hidden; }
   font-size: 0.62rem; letter-spacing: 0.14em; color: var(--accent-text); transition: background 0.25s, color 0.25s;
 }
 .logout-link:hover { background: var(--electric); color: var(--cold-white); }
+
+/* ===== Техническое примечание ===== */
+.tech-note { margin-top: 22px; padding: 20px 22px; background: rgba(var(--card-rgb),0.7); border: 1px solid var(--pale-blue); border-left: 3px solid var(--electric); }
+.tech-note-tag { display: block; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.24em; color: var(--accent-text); }
+.tech-note-title { margin: 8px 0 6px; font-family: var(--font-display); font-weight: 600; font-size: 1rem; line-height: 1.35; letter-spacing: 0.03em; color: var(--navy); }
+.tech-note-class { display: block; margin-bottom: 14px; font-size: 0.64rem; color: var(--steel); }
+.tech-note p { margin-bottom: 10px; font-size: 0.95rem; line-height: 1.65; }
+.tech-note strong { color: var(--navy); font-weight: 600; }
+.tech-note-foot { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--pale-blue); }
+body.theme-full .tech-note { background: rgba(66,12,26,0.4); border-color: rgba(136,50,64,0.5); border-left-color: var(--c-red); }
+
+/* красное окно при входе (одинаково для всех учётных записей) */
+.tech-popup {
+  position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px;
+  overflow-y: auto; background: rgba(10,0,3,0.78); animation: fade 0.4s ease both;
+}
+.tech-popup-box {
+  width: 100%; max-width: 560px; margin: auto; padding: 28px 30px 26px; color: #fff;
+  background: linear-gradient(160deg, #c4122f, #8f0d22); border: 1px solid #ff5b73; border-top: 4px solid #ff8da0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 70px rgba(189,16,45,0.55); animation: rise 0.5s ease both;
+}
+.tech-popup-box .tech-note-tag { color: #ffd3da; }
+.tech-popup-box .tech-note-title { color: #fff; font-size: 1.15rem; }
+.tech-popup-box .tech-note-class { color: #ffd3da; }
+.tech-popup-box p { margin-bottom: 12px; font-size: 0.98rem; line-height: 1.65; }
+.tech-popup-box strong { color: #fff; font-weight: 700; }
+.tech-popup-box .tech-note-foot { border-top-color: rgba(255,255,255,0.35); }
+.tech-popup-ok {
+  display: block; width: 100%; min-height: 46px; margin-top: 18px; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.3em;
+  color: #fff; border: 1px solid #fff; transition: background 0.25s, color 0.25s;
+}
+.tech-popup-ok:hover { background: #fff; color: #8f0d22; }
+.tech-popup-ok:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (max-width: 640px) { .tech-popup-box { padding: 22px 20px; } }
