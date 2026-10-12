@@ -21,6 +21,54 @@ function add(parent, ...children) {
   return parent;
 }
 
+function richText(parent, text) {
+  text.split('**').forEach((part, index) => {
+    if (!part) return;
+    add(parent, index % 2 ? el('strong', null, part) : document.createTextNode(part));
+  });
+  return parent;
+}
+
+function techNoteContent(box) {
+  const note = archiveMeta.techNote;
+  add(box, el('span', 'tech-note-tag', 'ТЕХНИЧЕСКОЕ ПРИМЕЧАНИЕ'), el('h4', 'tech-note-title', note.title), el('span', 'tech-note-class mono', `КЛАССИФИКАЦИЯ: ${note.classification}`));
+  note.paragraphs.forEach((text) => add(box, richText(el('p'), text)));
+  add(box, richText(el('p', 'tech-note-foot'), note.footnote));
+  return box;
+}
+
+const NOTICE_KEY = 'archive-tech-notice';
+
+function maybeShowTechNotice() {
+  try {
+    if (sessionStorage.getItem(NOTICE_KEY)) return;
+    sessionStorage.setItem(NOTICE_KEY, '1');
+  } catch (error) {
+    if (window.__techNoticeShown) return;
+    window.__techNoticeShown = true;
+  }
+  const overlay = el('div', 'tech-popup');
+  overlay.setAttribute('role', 'alertdialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'Техническое примечание');
+  const box = techNoteContent(el('div', 'tech-popup-box'));
+  const ok = el('button', 'tech-popup-ok', 'ПРИНЯТО');
+  ok.type = 'button';
+  add(box, ok);
+  add(overlay, box);
+  const close = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = (event) => {
+    if (event.key === 'Escape') close();
+  };
+  ok.addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(overlay);
+  ok.focus();
+}
+
 function isRedacted(doc) {
   return doc.protected === true && userRole !== 'full';
 }
@@ -159,7 +207,7 @@ function openDocument(id) {
 function overviewPanel() {
   const featured = documents[documents.length - 1];
   const wrap = el('div', 'overview');
-  const text = add(el('div', 'overview-text'), el('h3', 'panel-title', 'Обзор архива'), el('p', null, archiveMeta.intro));
+  const text = add(el('div', 'overview-text'), el('h3', 'panel-title', 'Обзор архива'), el('p', null, archiveMeta.intro), techNoteContent(el('aside', 'tech-note')));
   const box = el('div', 'featured');
   const open = el('button', 'featured-link', 'OPEN DOCUMENT');
   open.type = 'button';
@@ -453,3 +501,5 @@ buildTabs();
 buildHero();
 setupSecretDot();
 selectTab('overview');
+
+if (!document.body.classList.contains('is-locked')) maybeShowTechNotice();
