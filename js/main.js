@@ -136,11 +136,6 @@ function descriptionLines(value) {
   return Array.isArray(value) ? value : [value];
 }
 
-// папка изображений архива: images/<folder>/
-function docFolder(doc) {
-  return doc.folder ? `images/${doc.folder}/` : 'images/';
-}
-
 function photoSlot(doc, redact) {
   const figure = el('figure', 'doc-photo');
   const slot = add(el('div', 'doc-photo-window'), el('span', 'doc-photo-word', 'ФОТО'));
@@ -155,7 +150,6 @@ function photoSlot(doc, redact) {
     return figure;
   }
   findImage(
-    docFolder(doc),
     name,
     (url) => {
       const button = el('button', 'doc-photo-window');
@@ -340,10 +334,6 @@ function openViewer(item, panelOpen, opener) {
   close.focus();
 }
 
-function imageFolder(image) {
-  return image.folder ? `images/${image.folder}/` : 'images/';
-}
-
 function imageFrame(image) {
   const figure = el('figure', 'frame');
   const windowNode = add(el('div', 'frame-window'), el('span', 'frame-placeholder', 'FILE PENDING'));
@@ -367,7 +357,6 @@ function imageFrame(image) {
     return figure;
   }
   findImage(
-    imageFolder(image),
     image.name,
     (url) => {
       const button = el('button', 'frame-window');
@@ -390,17 +379,16 @@ function imageFrame(image) {
 
 function evidencePanel() {
   const wrap = el('div', 'evidence-groups');
-  // группы по папкам; изображения без известной папки попадут в конец
-  const known = imageGroups.map((group) => group.folder);
+  const known = imageGroups.map((group) => group.group);
   const groups = imageGroups.concat(
-    images.some((image) => !known.includes(image.folder)) ? [{ folder: undefined, title: 'Прочее', doc: null }] : []
+    images.some((image) => !known.includes(image.group)) ? [{ group: undefined, title: 'Прочее', doc: null }] : []
   );
   groups.forEach((group) => {
-    const items = images.filter((image) => (group.folder === undefined ? !known.includes(image.folder) : image.folder === group.folder));
+    const items = images.filter((image) => (group.group === undefined ? !known.includes(image.group) : image.group === group.group));
     if (items.length === 0) return;
     const section = el('section', 'evidence-group');
     const head = el('div', 'evidence-head');
-    add(head, el('h3', 'evidence-title', group.title), el('span', 'evidence-path mono', group.folder ? `images/${group.folder}/` : 'images/'));
+    add(head, el('h3', 'evidence-title', group.title));
     if (group.doc && documents.some((doc) => doc.id === group.doc)) {
       const link = el('button', 'evidence-link mono', `АРХИВ ${group.doc}`);
       link.type = 'button';
@@ -414,10 +402,8 @@ function evidencePanel() {
   return wrap;
 }
 
-// ---------- карта с приближением ----------
-
 function createMap(url, info, large) {
-  const MAX_ZOOM = 8; // во сколько раз можно увеличить относительно «вписанного» вида
+  const MAX_ZOOM = 8;
   const box = el('div', large ? 'map is-large' : 'map');
   const viewport = el('div', 'map-viewport');
   viewport.tabIndex = 0;
@@ -482,7 +468,6 @@ function createMap(url, info, large) {
     controls.appendChild(tool('Развернуть карту на весь экран', '⤢', () => openMapViewer(url, info, box.querySelector('.map-btn:last-child'))));
   }
 
-  // колесо мыши
   viewport.addEventListener(
     'wheel',
     (event) => {
@@ -493,7 +478,6 @@ function createMap(url, info, large) {
     { passive: false }
   );
 
-  // перетаскивание и щипок двумя пальцами
   const pointers = new Map();
   let pinch = null;
   viewport.addEventListener('pointerdown', (event) => {
@@ -590,14 +574,13 @@ function redactedMap() {
 function mapBlock() {
   const figure = el('figure', 'map-block');
   const holder = el('div', 'map-holder');
-  const path = `images/${capitalMap.folder}/${capitalMap.name}.png`;
+  const path = `images/${capitalMap.name}.png`;
   const pending = el('div', 'map-pending mono');
   add(pending, el('span', null, 'MAP FILE PENDING'), el('span', 'map-pending-path', `положите файл: ${path}`));
   add(holder, pending);
   const caption = el('figcaption', 'map-caption mono', `КАРТА // ${capitalMap.title.toUpperCase()}`);
   add(figure, holder, caption);
   findImage(
-    `images/${capitalMap.folder}/`,
     capitalMap.name,
     (url) => {
       holder.replaceChildren(createMap(url, capitalMap, false));
