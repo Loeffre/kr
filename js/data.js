@@ -200,7 +200,7 @@ const documents = [
   },
     {
     id: 'DOC-002',
-    title: 'Название документа',
+    title: 'бебебебе',
     date: 'UNKNOWN',
     classification: 'RESTRICTED',
     status: 'STORED',
