@@ -92,7 +92,13 @@ function photoSlot(doc, redact) {
   const name = doc.photo || doc.id.toLowerCase();
   const caption = el('figcaption', 'mono', redact ? 'ДАННЫЕ СКРЫТЫ' : `ФАЙЛ: ${name}`);
   add(figure, slot, el('i', 'corner corner-tl'), el('i', 'corner corner-br'), caption);
-  if (redact) return figure;
+  if (redact) {
+    const black = el('div', 'doc-photo-window is-redacted');
+    black.setAttribute('role', 'img');
+    black.setAttribute('aria-label', 'Данные скрыты');
+    figure.replaceChild(black, slot);
+    return figure;
+  }
   findImage(
     'images/',
     name,
@@ -212,7 +218,12 @@ function openViewer(item, panelOpen, opener) {
   overlay.setAttribute('aria-label', item.label);
 
   const stage = el('div', 'viewer-stage');
-  if (item.url) {
+  if (item.redacted) {
+    const black = el('div', 'viewer-redacted mono', 'ДАННЫЕ СКРЫТЫ // УРОВЕНЬ ДОПУСКА: ОГРАНИЧЕННЫЙ');
+    black.setAttribute('role', 'img');
+    black.setAttribute('aria-label', 'Данные скрыты');
+    add(stage, black);
+  } else if (item.url) {
     const img = el('img');
     img.src = item.url;
     img.alt = item.title;
@@ -232,12 +243,18 @@ function openViewer(item, panelOpen, opener) {
   panel.id = 'viewer-panel';
   panel.setAttribute('aria-label', 'Описание изображения');
   const meta = el('dl', 'viewer-meta mono');
-  [['ФАЙЛ', item.file || '—'], ['СТАТУС', item.url ? 'STORED' : 'PENDING']].forEach(([label, value]) =>
-    add(meta, add(el('div'), el('dt', null, label), el('dd', null, value)))
+  const metaRows = item.redacted
+    ? [['ФАЙЛ', null], ['СТАТУС', 'REDACTED']]
+    : [['ФАЙЛ', item.file || '—'], ['СТАТУС', item.url ? 'STORED' : 'PENDING']];
+  metaRows.forEach(([label, value]) =>
+    add(meta, add(el('div'), el('dt', null, label), value === null ? add(el('dd'), redactedBars('XXXXXXXX')) : el('dd', null, value)))
   );
   const body = el('div', 'viewer-text');
-  item.description.forEach((line) => add(body, el('p', null, line)));
-  add(panel, el('span', 'viewer-tag mono', 'ОПИСАНИЕ'), el('h3', 'viewer-title', item.title), meta, body);
+  item.description.forEach((line) => add(body, add(el('p'), item.redacted ? redactedBars(line) : document.createTextNode(line))));
+  const heading = el('h3', 'viewer-title');
+  if (item.redacted) add(heading, redactedBars(item.title));
+  else heading.textContent = item.title;
+  add(panel, el('span', 'viewer-tag mono', 'ОПИСАНИЕ'), heading, meta, body);
 
   const setPanel = (open) => {
     overlay.classList.toggle('is-panel-open', open);
@@ -281,6 +298,15 @@ function imageFrame(image) {
   };
   add(figure, windowNode, el('i', 'corner corner-tl'), el('i', 'corner corner-tr'), el('i', 'corner corner-bl'), el('i', 'corner corner-br'));
   add(figure, add(el('figcaption'), el('span', 'frame-number', `IMAGE ${image.number}`), el('span', null, 'ARCHIVE FRAGMENT'), status));
+  if (userRole !== 'full') {
+    const black = el('button', 'frame-window is-redacted');
+    black.type = 'button';
+    black.setAttribute('aria-label', `Изображение ${image.number}: данные скрыты`);
+    black.addEventListener('click', () => openViewer({ ...item, redacted: true }, false, black));
+    figure.replaceChild(black, windowNode);
+    status.textContent = 'STATUS: REDACTED';
+    return figure;
+  }
   findImage(
     'images/',
     image.name,
