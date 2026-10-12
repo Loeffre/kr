@@ -14,16 +14,22 @@ const tabs = [
   { id: 'restricted', number: '05', label: 'RESTRICTED' }
 ];
 
+// Изображения лежат в папке images/ (имя файла без расширения = name).
+// title / description показываются в боковой панели «ОПИСАНИЕ».
+// description — строка или массив абзацев.
 const images = [
-  { name: 'image-1', number: '001' },
-  { name: 'image-2', number: '002' },
-  { name: 'image-3', number: '003' },
-  { name: 'image-4', number: '004' }
+  { name: 'image-1', number: '001', title: 'Архивный фрагмент 001', description: ['Описание изображения пока не заполнено.', 'Измените текст в js/data.js, в массиве images.'] },
+  { name: 'image-2', number: '002', title: 'Архивный фрагмент 002', description: ['Описание изображения пока не заполнено.'] },
+  { name: 'image-3', number: '003', title: 'Архивный фрагмент 003', description: ['Описание изображения пока не заполнено.'] },
+  { name: 'image-4', number: '004', title: 'Архивный фрагмент 004', description: ['Описание изображения пока не заполнено.'] }
 ];
 
 const documents = [
   {
     id: 'DOC-001',
+    // Фото персонажа: положите файл images/doc-001.png (или jpg/webp) — подхватится само.
+    // photo: 'другое-имя' — если файл называется иначе. photoDescription — текст для боковой панели.
+    photoDescription: ['Описание изображения пока не заполнено.'],
     title: 'Лоеффри Вилсот (Реплик Эхфанд)',
     date: 'UNKNOWN',
     classification: 'RESTRICTED',
