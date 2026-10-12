@@ -1,6 +1,6 @@
 const ACCOUNTS = [
   { login: 'Крих Вейль', password: '7.TGE3128TGF', role: 'full' },
-  { login: 'Гость', password: 'guest', role: 'limited' }
+  { login: 'Гость', password: '676767', role: 'limited' }
 ];
 const ACCESS_KEY = 'archive-access';
 const GRANTED_MS = 900;
