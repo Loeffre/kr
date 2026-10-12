@@ -81,9 +81,44 @@ function renderBlocks(blocks, parent, ctx = {}) {
   });
 }
 
+function descriptionLines(value) {
+  if (!value) return ['Описание изображения не добавлено.'];
+  return Array.isArray(value) ? value : [value];
+}
+
+function photoSlot(doc, redact) {
+  const figure = el('figure', 'doc-photo');
+  const slot = add(el('div', 'doc-photo-window'), el('span', 'doc-photo-word', 'ФОТО'));
+  const name = doc.photo || doc.id.toLowerCase();
+  const caption = el('figcaption', 'mono', redact ? 'ДАННЫЕ СКРЫТЫ' : `ФАЙЛ: ${name}`);
+  add(figure, slot, el('i', 'corner corner-tl'), el('i', 'corner corner-br'), caption);
+  if (redact) return figure;
+  findImage(
+    'images/',
+    name,
+    (url) => {
+      const button = el('button', 'doc-photo-window');
+      button.type = 'button';
+      button.setAttribute('aria-label', `Открыть фото: ${doc.title}`);
+      const img = el('img');
+      img.src = url;
+      img.alt = doc.title;
+      add(button, img);
+      button.addEventListener('click', () =>
+        openViewer({ url, label: `PORTRAIT // ${doc.id}`, title: doc.title, description: descriptionLines(doc.photoDescription), file: url.split('/').pop() }, false, button)
+      );
+      figure.replaceChild(button, slot);
+      caption.textContent = `ФОТО // ${doc.id}`;
+    },
+    () => {}
+  );
+  return figure;
+}
+
 function fieldsBlock(block, ctx = {}) {
-  const card = el('div', 'doc-fields');
+  const card = el('div', ctx.doc ? 'doc-fields has-photo' : 'doc-fields');
   if (block.title) add(card, el('span', 'doc-fields-title', block.title));
+  if (ctx.doc) add(card, photoSlot(ctx.doc, ctx.redact));
   const list = el('dl', 'doc-fields-list');
   block.items.forEach((item) => {
     const open = !ctx.redact || ctx.openSection || item.public === true;
@@ -149,7 +184,7 @@ function documentsPanel() {
   current.sections.forEach((section) => {
     const block = el('section', 'doc-section');
     add(block, el('h4', 'doc-heading', section.title));
-    renderBlocks(section.blocks, block, { redact: redacted, openSection: section.public === true });
+    renderBlocks(section.blocks, block, { redact: redacted, openSection: section.public === true, doc: current });
     add(article, block);
   });
   return add(wrap, list, article);
@@ -170,30 +205,80 @@ function recordsPanel() {
   return wrap;
 }
 
-function openLightbox(url, number) {
-  const overlay = el('div', 'lightbox');
+function openViewer(item, panelOpen, opener) {
+  const overlay = el('div', 'viewer');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
-  const img = el('img');
-  img.src = url;
-  img.alt = `Архивный фрагмент ${number}`;
-  add(overlay, img, el('span', 'lightbox-label', `IMAGE ${number} // CLICK OR ESC TO CLOSE`));
-  const close = () => {
+  overlay.setAttribute('aria-label', item.label);
+
+  const stage = el('div', 'viewer-stage');
+  if (item.url) {
+    const img = el('img');
+    img.src = item.url;
+    img.alt = item.title;
+    add(stage, img);
+  } else {
+    add(stage, el('div', 'viewer-missing mono', 'FILE PENDING'));
+  }
+
+  const toggle = el('button', 'viewer-tab');
+  toggle.type = 'button';
+  toggle.setAttribute('aria-controls', 'viewer-panel');
+  const close = el('button', 'viewer-btn', 'ЗАКРЫТЬ ✕');
+  close.type = 'button';
+  const bar = add(el('div', 'viewer-bar'), el('span', 'viewer-label mono', item.label), add(el('div', 'viewer-actions'), close));
+
+  const panel = el('aside', 'viewer-panel');
+  panel.id = 'viewer-panel';
+  panel.setAttribute('aria-label', 'Описание изображения');
+  const meta = el('dl', 'viewer-meta mono');
+  [['ФАЙЛ', item.file || '—'], ['СТАТУС', item.url ? 'STORED' : 'PENDING']].forEach(([label, value]) =>
+    add(meta, add(el('div'), el('dt', null, label), el('dd', null, value)))
+  );
+  const body = el('div', 'viewer-text');
+  item.description.forEach((line) => add(body, el('p', null, line)));
+  add(panel, el('span', 'viewer-tag mono', 'ОПИСАНИЕ'), el('h3', 'viewer-title', item.title), meta, body);
+
+  const setPanel = (open) => {
+    overlay.classList.toggle('is-panel-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.textContent = open ? 'СКРЫТЬ ▸' : '◂ ОПИСАНИЕ';
+    panel.inert = !open;
+  };
+  const shut = () => {
     overlay.remove();
+    document.body.classList.remove('has-viewer');
     document.removeEventListener('keydown', onKey);
+    if (opener && opener.isConnected) opener.focus();
   };
   const onKey = (event) => {
-    if (event.key === 'Escape') close();
+    if (event.key === 'Escape') shut();
   };
-  overlay.addEventListener('click', close);
+  toggle.addEventListener('click', () => setPanel(!overlay.classList.contains('is-panel-open')));
+  close.addEventListener('click', shut);
+  stage.addEventListener('click', (event) => {
+    if (event.target === stage) shut();
+  });
   document.addEventListener('keydown', onKey);
+
+  add(overlay, stage, bar, toggle, panel);
+  setPanel(panelOpen);
+  document.body.classList.add('has-viewer');
   document.body.appendChild(overlay);
+  close.focus();
 }
 
 function imageFrame(image) {
   const figure = el('figure', 'frame');
   const windowNode = add(el('div', 'frame-window'), el('span', 'frame-placeholder', 'FILE PENDING'));
   const status = el('span', 'frame-status', 'STATUS: PENDING');
+  const item = {
+    url: null,
+    label: `IMAGE ${image.number}`,
+    title: image.title || `Архивный фрагмент ${image.number}`,
+    description: descriptionLines(image.description),
+    file: null
+  };
   add(figure, windowNode, el('i', 'corner corner-tl'), el('i', 'corner corner-tr'), el('i', 'corner corner-bl'), el('i', 'corner corner-br'));
   add(figure, add(el('figcaption'), el('span', 'frame-number', `IMAGE ${image.number}`), el('span', null, 'ARCHIVE FRAGMENT'), status));
   findImage(
@@ -202,11 +287,14 @@ function imageFrame(image) {
     (url) => {
       const button = el('button', 'frame-window');
       button.type = 'button';
+      button.setAttribute('aria-label', `Открыть изображение ${image.number}`);
       const img = el('img');
       img.src = url;
       img.alt = `Архивный фрагмент ${image.number}`;
       add(button, img, el('span', 'frame-scan'));
-      button.addEventListener('click', () => openLightbox(url, image.number));
+      item.url = url;
+      item.file = url.split('/').pop();
+      button.addEventListener('click', () => openViewer(item, false, button));
       figure.replaceChild(button, windowNode);
       status.textContent = 'STATUS: STORED';
     },
