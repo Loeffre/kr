@@ -6,7 +6,6 @@ const signalExit = document.getElementById('signal-exit');
 const revealCaption = () => signalCaption.classList.add('is-visible');
 
 findImage(
-  '../images/',
   'secret-image',
   (url) => {
     signalImage.onload = revealCaption;
@@ -16,7 +15,8 @@ findImage(
   () => {
     signalPlaceholder.classList.add('is-ready');
     revealCaption();
-  }
+  },
+  '../images/'
 );
 
 document.addEventListener('keydown', (event) => {
