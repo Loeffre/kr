@@ -450,7 +450,6 @@ body.theme-full .footer-status { color: var(--c-red); }
 body.theme-full .status-item dd { color: var(--navy); }
 body.theme-full .logout-link { border-color: var(--c-wine); color: var(--c-steel); }
 body.theme-full .logout-link:hover { background: var(--c-red); border-color: var(--c-red); color: #fff; }
-body.theme-full .redact-bar { background: var(--c-wine); }
 body.theme-full .doc-empty { border-color: rgba(136,50,64,0.6); }
 
 /* ===== Фото-иконка в карточке объекта ===== */
@@ -526,3 +525,32 @@ body.has-viewer { overflow: hidden; }
   .viewer-stage { padding: 64px 52px 12px 12px; }
   .viewer-label { display: none; }
 }
+
+/* ===== Засекреченные изображения (гость) ===== */
+.frame-window.is-redacted, .doc-photo-window.is-redacted { background: #000; background-image: none; }
+.frame-window.is-redacted { cursor: zoom-in; }
+.doc-photo-window.is-redacted { cursor: default; }
+.viewer-redacted {
+  display: flex; align-items: center; justify-content: center; width: min(100%, 640px); aspect-ratio: 1 / 1; max-height: 100%;
+  padding: 24px; text-align: center; background: #000; border: 1px solid rgba(var(--accent-rgb),0.5);
+  color: var(--on-dark); font-size: 0.72rem; letter-spacing: 0.2em; line-height: 1.8; cursor: default;
+}
+
+/* ===== Засекречивание, баннер, выход ===== */
+.svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.redacted { display: inline; }
+.redact-bar { display: inline-block; height: 0.95em; margin: 0; vertical-align: -0.12em; background: #000; border-radius: 1px; }
+.restricted-block .redact-bar, .featured .redact-bar, .viewer-panel .redact-bar { background: #000; box-shadow: 0 0 0 1px rgba(255,255,255,0.14); }
+
+.doc-banner {
+  margin: 18px 0 0; padding: 12px 16px; background: var(--panel); color: var(--cold-white);
+  border-left: 3px solid var(--electric); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.16em; line-height: 1.6;
+}
+.restricted-panel .restricted-block p { margin-top: 6px; }
+
+.logout-link {
+  margin-left: 8px; padding: 2px 6px; border: 1px solid var(--pale-blue); font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.14em; color: var(--accent-text); transition: background 0.25s, color 0.25s;
+}
+.logout-link:hover { background: var(--electric); color: var(--cold-white); }
