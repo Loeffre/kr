@@ -1,6 +1,6 @@
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
 
-function findImage(folder, name, onFound, onMissing) {
+function findImage(name, onFound, onMissing) {
   let index = 0;
   const tryNext = () => {
     if (index >= IMAGE_EXTENSIONS.length) {
