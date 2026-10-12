@@ -108,7 +108,9 @@ function redactedBlock(block) {
 function renderBlocks(blocks, parent, ctx = {}) {
   blocks.forEach((block) => {
     const visible = !ctx.redact || ctx.openSection || block.public === true;
-    if (block.t === 'fields') {
+    if (block.t === 'map') {
+      add(parent, visible ? mapBlock() : redactedMap());
+    } else if (block.t === 'fields') {
       add(parent, fieldsBlock(block, ctx));
     } else if (!visible) {
       add(parent, redactedBlock(block));
@@ -134,6 +136,11 @@ function descriptionLines(value) {
   return Array.isArray(value) ? value : [value];
 }
 
+// папка изображений архива: images/<folder>/
+function docFolder(doc) {
+  return doc.folder ? `images/${doc.folder}/` : 'images/';
+}
+
 function photoSlot(doc, redact) {
   const figure = el('figure', 'doc-photo');
   const slot = add(el('div', 'doc-photo-window'), el('span', 'doc-photo-word', 'ФОТО'));
@@ -148,7 +155,7 @@ function photoSlot(doc, redact) {
     return figure;
   }
   findImage(
-    'images/',
+    docFolder(doc),
     name,
     (url) => {
       const button = el('button', 'doc-photo-window');
@@ -333,6 +340,10 @@ function openViewer(item, panelOpen, opener) {
   close.focus();
 }
 
+function imageFolder(image) {
+  return image.folder ? `images/${image.folder}/` : 'images/';
+}
+
 function imageFrame(image) {
   const figure = el('figure', 'frame');
   const windowNode = add(el('div', 'frame-window'), el('span', 'frame-placeholder', 'FILE PENDING'));
@@ -356,7 +367,7 @@ function imageFrame(image) {
     return figure;
   }
   findImage(
-    'images/',
+    imageFolder(image),
     image.name,
     (url) => {
       const button = el('button', 'frame-window');
@@ -378,9 +389,223 @@ function imageFrame(image) {
 }
 
 function evidencePanel() {
-  const wrap = el('div', 'evidence');
-  images.forEach((image) => add(wrap, imageFrame(image)));
+  const wrap = el('div', 'evidence-groups');
+  // группы по папкам; изображения без известной папки попадут в конец
+  const known = imageGroups.map((group) => group.folder);
+  const groups = imageGroups.concat(
+    images.some((image) => !known.includes(image.folder)) ? [{ folder: undefined, title: 'Прочее', doc: null }] : []
+  );
+  groups.forEach((group) => {
+    const items = images.filter((image) => (group.folder === undefined ? !known.includes(image.folder) : image.folder === group.folder));
+    if (items.length === 0) return;
+    const section = el('section', 'evidence-group');
+    const head = el('div', 'evidence-head');
+    add(head, el('h3', 'evidence-title', group.title), el('span', 'evidence-path mono', group.folder ? `images/${group.folder}/` : 'images/'));
+    if (group.doc && documents.some((doc) => doc.id === group.doc)) {
+      const link = el('button', 'evidence-link mono', `АРХИВ ${group.doc}`);
+      link.type = 'button';
+      link.addEventListener('click', () => openDocument(group.doc));
+      add(head, link);
+    }
+    const grid = el('div', 'evidence');
+    items.forEach((image) => add(grid, imageFrame(image)));
+    add(wrap, add(section, head, grid));
+  });
   return wrap;
+}
+
+// ---------- карта с приближением ----------
+
+function createMap(url, info, large) {
+  const MAX_ZOOM = 8; // во сколько раз можно увеличить относительно «вписанного» вида
+  const box = el('div', large ? 'map is-large' : 'map');
+  const viewport = el('div', 'map-viewport');
+  viewport.tabIndex = 0;
+  viewport.setAttribute('role', 'application');
+  viewport.setAttribute('aria-label', `${info.title}. Колесо мыши или кнопки + и − меняют масштаб, перетаскивание двигает карту.`);
+  const img = el('img', 'map-img');
+  img.alt = info.title;
+  img.draggable = false;
+  add(viewport, img);
+
+  const view = { scale: 1, x: 0, y: 0, fit: 1, ready: false };
+  const zoomLabel = el('span', 'map-zoom mono', '100%');
+
+  const clampView = () => {
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+    const w = img.naturalWidth * view.scale;
+    const h = img.naturalHeight * view.scale;
+    view.x = w <= vw ? (vw - w) / 2 : Math.min(0, Math.max(vw - w, view.x));
+    view.y = h <= vh ? (vh - h) / 2 : Math.min(0, Math.max(vh - h, view.y));
+  };
+  const apply = () => {
+    clampView();
+    img.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
+    zoomLabel.textContent = `${Math.round((view.scale / view.fit) * 100)}%`;
+  };
+  const fitView = () => {
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+    if (!vw || !vh || !img.naturalWidth) return;
+    view.fit = Math.min(vw / img.naturalWidth, vh / img.naturalHeight);
+    view.scale = view.fit;
+    view.ready = true;
+    apply();
+  };
+  const zoomAt = (factor, cx, cy) => {
+    if (!view.ready) return;
+    const next = Math.min(view.fit * MAX_ZOOM, Math.max(view.fit * 0.5, view.scale * factor));
+    const ratio = next / view.scale;
+    view.x = cx - (cx - view.x) * ratio;
+    view.y = cy - (cy - view.y) * ratio;
+    view.scale = next;
+    apply();
+  };
+  const zoomCenter = (factor) => zoomAt(factor, viewport.clientWidth / 2, viewport.clientHeight / 2);
+
+  const tool = (label, text, handler) => {
+    const button = el('button', 'map-btn', text);
+    button.type = 'button';
+    button.setAttribute('aria-label', label);
+    button.addEventListener('click', handler);
+    return button;
+  };
+  const controls = el('div', 'map-controls');
+  add(
+    controls,
+    tool('Приблизить', '+', () => zoomCenter(1.5)),
+    tool('Отдалить', '−', () => zoomCenter(1 / 1.5)),
+    tool('Вернуть весь вид', '⟲', fitView)
+  );
+  if (!large) {
+    controls.appendChild(tool('Развернуть карту на весь экран', '⤢', () => openMapViewer(url, info, box.querySelector('.map-btn:last-child'))));
+  }
+
+  // колесо мыши
+  viewport.addEventListener(
+    'wheel',
+    (event) => {
+      event.preventDefault();
+      const rect = viewport.getBoundingClientRect();
+      zoomAt(Math.exp(-event.deltaY * 0.0016), event.clientX - rect.left, event.clientY - rect.top);
+    },
+    { passive: false }
+  );
+
+  // перетаскивание и щипок двумя пальцами
+  const pointers = new Map();
+  let pinch = null;
+  viewport.addEventListener('pointerdown', (event) => {
+    viewport.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    viewport.classList.add('is-grabbing');
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  });
+  viewport.addEventListener('pointermove', (event) => {
+    const last = pointers.get(event.pointerId);
+    if (!last) return;
+    const current = { x: event.clientX, y: event.clientY };
+    if (pointers.size === 1) {
+      view.x += current.x - last.x;
+      view.y += current.y - last.y;
+      apply();
+    } else if (pointers.size === 2 && pinch) {
+      pointers.set(event.pointerId, current);
+      const [a, b] = [...pointers.values()];
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      const rect = viewport.getBoundingClientRect();
+      zoomAt(distance / pinch, (a.x + b.x) / 2 - rect.left, (a.y + b.y) / 2 - rect.top);
+      pinch = distance;
+    }
+    pointers.set(event.pointerId, current);
+  });
+  const release = (event) => {
+    pointers.delete(event.pointerId);
+    pinch = null;
+    if (pointers.size === 0) viewport.classList.remove('is-grabbing');
+  };
+  viewport.addEventListener('pointerup', release);
+  viewport.addEventListener('pointercancel', release);
+  viewport.addEventListener('dblclick', (event) => {
+    const rect = viewport.getBoundingClientRect();
+    zoomAt(2, event.clientX - rect.left, event.clientY - rect.top);
+  });
+  viewport.addEventListener('keydown', (event) => {
+    if (event.key === '+' || event.key === '=') zoomCenter(1.4);
+    else if (event.key === '-' || event.key === '_') zoomCenter(1 / 1.4);
+    else if (event.key === '0') fitView();
+    else return;
+    event.preventDefault();
+  });
+
+  img.addEventListener('load', fitView);
+  img.src = url;
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(() => (view.ready ? apply() : fitView())).observe(viewport);
+  }
+  return add(box, viewport, controls, zoomZone(zoomLabel));
+}
+
+function zoomZone(label) {
+  return add(el('div', 'map-zoom-wrap'), label);
+}
+
+function openMapViewer(url, info, opener) {
+  const overlay = el('div', 'viewer map-overlay');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', info.title);
+  const close = el('button', 'viewer-btn', 'ЗАКРЫТЬ ✕');
+  close.type = 'button';
+  const bar = add(el('div', 'viewer-bar'), el('span', 'viewer-label mono', `MAP // ${info.title}`), add(el('div', 'viewer-actions'), close));
+  const stage = add(el('div', 'map-stage'), createMap(url, info, true));
+  const shut = () => {
+    overlay.remove();
+    document.body.classList.remove('has-viewer');
+    document.removeEventListener('keydown', onKey);
+    if (opener && opener.isConnected) opener.focus();
+  };
+  const onKey = (event) => {
+    if (event.key === 'Escape') shut();
+  };
+  close.addEventListener('click', shut);
+  document.addEventListener('keydown', onKey);
+  add(overlay, stage, bar);
+  document.body.classList.add('has-viewer');
+  document.body.appendChild(overlay);
+  close.focus();
+}
+
+function redactedMap() {
+  const black = el('div', 'map-redacted mono', 'ДАННЫЕ СКРЫТЫ // УРОВЕНЬ ДОПУСКА: ОГРАНИЧЕННЫЙ');
+  black.setAttribute('role', 'img');
+  black.setAttribute('aria-label', 'Данные скрыты');
+  return black;
+}
+
+function mapBlock() {
+  const figure = el('figure', 'map-block');
+  const holder = el('div', 'map-holder');
+  const path = `images/${capitalMap.folder}/${capitalMap.name}.png`;
+  const pending = el('div', 'map-pending mono');
+  add(pending, el('span', null, 'MAP FILE PENDING'), el('span', 'map-pending-path', `положите файл: ${path}`));
+  add(holder, pending);
+  const caption = el('figcaption', 'map-caption mono', `КАРТА // ${capitalMap.title.toUpperCase()}`);
+  add(figure, holder, caption);
+  findImage(
+    `images/${capitalMap.folder}/`,
+    capitalMap.name,
+    (url) => {
+      holder.replaceChildren(createMap(url, capitalMap, false));
+      caption.textContent = `КАРТА // ${capitalMap.title.toUpperCase()} // ФАЙЛ: ${url.split('/').pop()}`;
+    },
+    () => {}
+  );
+  return figure;
 }
 
 function restrictedPanel() {
