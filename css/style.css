@@ -396,10 +396,8 @@ body.is-locked .shell, body.is-locked .grid-backdrop, body.is-locked .scan-line 
 
 .signal, .transmission { --electric: #ff2a2a; --accent-rgb: 255,42,42; --accent-text: #ff2a2a; }
 
-/* ===== Тема «Крих Вейль» ===== */
 body.theme-full {
-  /* палитра: #bd102d #883240 #420c1a #12151f #96a9ae */
-  --c-red: #bd102d; --c-wine: #883240; --c-burgundy: #420c1a; --c-ink: #12151f; --c-steel: #96a9ae;
+    --c-red: #bd102d; --c-wine: #883240; --c-burgundy: #420c1a; --c-ink: #12151f; --c-steel: #96a9ae;
   --white: #e6ecee; --cold-white: #e6ecee; --ice: #25111d; --pale-blue: rgba(150,169,174,0.22);
   --electric: #bd102d; --accent-rgb: 189,16,45; --grid-rgb: 150,169,174; --card-rgb: 66,12,26; --overlay-rgb: 18,21,31;
   --steel: #96a9ae; --grey: #7d9096; --graphite: #96a9ae; --ink: #96a9ae; --navy: #d9e2e5;
@@ -452,7 +450,6 @@ body.theme-full .logout-link { border-color: var(--c-wine); color: var(--c-steel
 body.theme-full .logout-link:hover { background: var(--c-red); border-color: var(--c-red); color: #fff; }
 body.theme-full .doc-empty { border-color: rgba(136,50,64,0.6); }
 
-/* ===== Фото-иконка в карточке объекта ===== */
 .doc-fields.has-photo {
   display: grid; grid-template-columns: 104px 1fr; column-gap: 18px; align-items: center;
   grid-template-areas: 'photo title' 'list list';
@@ -472,7 +469,6 @@ button.doc-photo-window:hover img { transform: scale(1.06); }
 .doc-photo-word { font-family: var(--font-display); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3em; padding-left: 0.3em; color: var(--steel); }
 .doc-photo figcaption { display: none; }
 
-/* ===== Просмотр изображения с боковым описанием ===== */
 body.has-viewer { overflow: hidden; }
 .viewer { position: fixed; inset: 0; z-index: 50; background: rgba(var(--overlay-rgb),0.98); animation: fade 0.3s ease both; }
 .viewer-stage {
@@ -491,7 +487,6 @@ body.has-viewer { overflow: hidden; }
 }
 .viewer-btn:hover { background: var(--electric); border-color: var(--electric); color: #fff; }
 
-/* боковая кнопка «ОПИСАНИЕ» — вкладка у правого края, едет вместе с панелью */
 .viewer-tab {
   position: absolute; top: 50%; right: 0; z-index: 4; transform: translateY(-50%);
   padding: 18px 10px; writing-mode: vertical-rl; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.24em;
@@ -526,7 +521,6 @@ body.has-viewer { overflow: hidden; }
   .viewer-label { display: none; }
 }
 
-/* ===== Засекреченные изображения (гость) ===== */
 .frame-window.is-redacted, .doc-photo-window.is-redacted { background: #000; background-image: none; }
 .frame-window.is-redacted { cursor: zoom-in; }
 .doc-photo-window.is-redacted { cursor: default; }
@@ -536,7 +530,6 @@ body.has-viewer { overflow: hidden; }
   color: var(--on-dark); font-size: 0.72rem; letter-spacing: 0.2em; line-height: 1.8; cursor: default;
 }
 
-/* ===== Засекречивание, баннер, выход ===== */
 .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 .redacted { display: inline; }
@@ -555,7 +548,6 @@ body.has-viewer { overflow: hidden; }
 }
 .logout-link:hover { background: var(--electric); color: var(--cold-white); }
 
-/* ===== Техническое примечание ===== */
 .tech-note { margin-top: 22px; padding: 20px 22px; background: rgba(var(--card-rgb),0.7); border: 1px solid var(--pale-blue); border-left: 3px solid var(--electric); }
 .tech-note-tag { display: block; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.24em; color: var(--accent-text); }
 .tech-note-title { margin: 8px 0 6px; font-family: var(--font-display); font-weight: 600; font-size: 1rem; line-height: 1.35; letter-spacing: 0.03em; color: var(--navy); }
@@ -565,7 +557,6 @@ body.has-viewer { overflow: hidden; }
 .tech-note-foot { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--pale-blue); }
 body.theme-full .tech-note { background: rgba(66,12,26,0.4); border-color: rgba(136,50,64,0.5); border-left-color: var(--c-red); }
 
-/* красное окно при входе (одинаково для всех учётных записей) */
 .tech-popup {
   position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px;
   overflow-y: auto; background: rgba(10,0,3,0.78); animation: fade 0.4s ease both;
@@ -589,7 +580,6 @@ body.theme-full .tech-note { background: rgba(66,12,26,0.4); border-color: rgba(
 .tech-popup-ok:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 @media (max-width: 640px) { .tech-popup-box { padding: 22px 20px; } }
 
-/* ===== папки изображений: группы во вкладке VISUAL EVIDENCE ===== */
 .evidence-groups { display: flex; flex-direction: column; gap: 46px; max-width: 980px; margin: 0 auto; }
 .evidence-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--electric); }
 .evidence-title { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); }
@@ -600,7 +590,6 @@ body.theme-full .evidence-head { border-bottom-color: var(--c-wine); }
 body.theme-full .evidence-link { border-color: var(--c-steel); }
 body.theme-full .evidence-link:hover { background: var(--c-red); border-color: var(--c-red); }
 
-/* ===== карта столицы с приближением ===== */
 .map-block { margin: 18px 0 22px; }
 .map-holder { position: relative; }
 .map {
