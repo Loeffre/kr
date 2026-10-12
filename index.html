@@ -12,12 +12,18 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="is-locked">
+    <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="logo-slate" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#425363" />
+        <feComposite in2="SourceAlpha" operator="in" />
+      </filter>
+    </svg>
     <div class="login" id="login">
       <form class="login-card" id="login-form" autocomplete="off" novalidate>
         <div class="login-sigil"><img class="sigil" src="images/logo.png" width="220" height="182" alt="Символ архива" /></div>
         <h2 class="login-name">Le Noyau de Mémoire</h2>
         <p class="login-sub">вечный архив</p>
-        <p class="login-warning">Данный архив доступен лишь высшим эшилону<br />Введите данные для входа.</p>
+        <p class="login-warning">Данный архив доступен не всем.<br />Введите данные для входа.</p>
         <label class="login-field">
           <span>ЛОГИН</span>
           <input type="text" id="login-name" autocomplete="off" autocapitalize="off" spellcheck="false" />
@@ -43,14 +49,15 @@
             <dt>SYSTEM STATUS</dt>
             <dd>ACTIVE <button type="button" class="secret-dot" id="secret-dot" aria-label="Индикатор состояния"></button></dd>
           </div>
-          <div class="status-item"><dt>ACCESS LEVEL</dt><dd>RESTRICTED</dd></div>
+          <div class="status-item"><dt>ACCESS LEVEL</dt><dd id="access-level">RESTRICTED</dd></div>
           <div class="status-item"><dt>SESSION</dt><dd id="session-id"></dd></div>
+          <div class="status-item"><dt>OPERATOR</dt><dd><span id="operator-name"></span><button type="button" class="logout-link" id="logout">ВЫЙТИ</button></dd></div>
         </dl>
       </header>
       <section class="hero">
         <div class="hero-top">
           <div class="hero-main">
-            <h1 class="hero-title">АРХИВ ДАННЫХ AR98</h1>
+            <h1 class="hero-title">АРХИВ ЗАСЕКРЕЧЕННЫХ ДАННЫХ</h1>
             <p class="hero-sub">RESTRICTED ACCESS // UNKNOWN ORIGIN</p>
             <p class="hero-text" id="hero-text"></p>
           </div>
@@ -73,7 +80,7 @@
     </div>
     <script src="js/data.js"></script>
     <script src="js/images.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/login.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>
