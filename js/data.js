@@ -200,18 +200,16 @@ const documents = [
   },
     {
     id: 'DOC-002',
-    title: 'бебебебе',
+    title: 'Скоро будет...',
     date: 'UNKNOWN',
     classification: 'RESTRICTED',
     status: 'STORED',
-    summary: 'Короткое описание для главной вкладки.',
+    summary: 'бебеб я трудоголик',
     sections: [
       {
         title: 'Название раздела',
         blocks: [
-          { t: 'p', text: 'Обычный абзац.' },
-          { t: 'h', text: 'Подзаголовок' },
-          { t: 'ul', lead: 'Вступление к списку:', items: ['Первый пункт.', 'Второй пункт.'] }
+          { t: 'p', text: 'Здеся больше ничего нету бебебе' }
         ]
       }
     ]
