@@ -373,3 +373,18 @@ body.is-locked .shell, body.is-locked .grid-backdrop, body.is-locked .scan-line 
   .hero-emblem { order: -1; }
   .sigil { max-width: 130px; }
 }
+
+.doc-fields {
+  margin: 22px 0; padding: 18px 22px 8px; background: var(--ice);
+  border: 1px solid var(--pale-blue); border-left: 3px solid var(--electric);
+  box-shadow: inset 0 0 24px rgba(31,167,255,0.08);
+}
+.doc-fields-title { display: block; margin-bottom: 12px; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.24em; color: var(--electric); text-transform: uppercase; }
+.doc-fields-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.doc-field { padding: 9px 0 11px; border-top: 1px solid rgba(31,167,255,0.3); }
+.doc-field dt { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.2em; color: var(--steel); }
+.doc-field dd { font-family: var(--font-display); font-weight: 600; font-size: 1rem; line-height: 1.4; color: var(--navy); }
+
+@media (max-width: 640px) {
+  .doc-fields-list { grid-template-columns: 1fr; }
+}
