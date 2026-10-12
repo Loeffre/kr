@@ -4,8 +4,6 @@ const archiveMeta = {
   fileStatus: 'PARTIAL',
   notices: ['Данный архив доступен лишь высшиму эшелону', 'Объект находится под наблюдением.'],
   intro: 'Помните Совет охраняет вас.',
-  // Техническое примечание: показывается в «Обзоре» и один раз всплывает красным окном при входе.
-  // **текст** — жирный.
   techNote: {
     title: 'АРХИВ СОВЕТА СВЕТА. ТЕХНИЧЕСКОЕ ПРИМЕЧАНИЕ.',
     classification: 'ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ.',
@@ -25,23 +23,18 @@ const tabs = [
   { id: 'restricted', number: '05', label: 'RESTRICTED' }
 ];
 
-// Папки с изображениями. Каждая группа = папка images/<folder>/ и один архив (документ).
-// Чтобы добавить новую папку: допиши строку сюда, создай папку images/<folder>/
-// и добавь изображения в список images ниже с тем же folder.
 const imageGroups = [
-  { folder: 'loeffri', title: 'Лоеффри', doc: 'DOC-001' },
-  { folder: 'iris', title: 'Ирис: мир и биология', doc: 'DOC-003' },
-  { folder: 'epoch', title: 'Эпоха Угасших', doc: 'DOC-004' },
-  { folder: 'lie-mother', title: 'Лжи-Матерь', doc: 'DOC-005' },
-  { folder: 'council', title: 'Совет Света', doc: 'DOC-006' },
-  { folder: 'war', title: 'Война на Ирисе', doc: 'DOC-007' }
+  { group: 'loeffri', title: 'Лоеффри', doc: 'DOC-001' },
+  { group: 'iris', title: 'Ирис: мир и биология', doc: 'DOC-003' },
+  { group: 'epoch', title: 'Эпоха Угасших', doc: 'DOC-004' },
+  { group: 'lie-mother', title: 'Лжи-Матерь', doc: 'DOC-005' },
+  { group: 'council', title: 'Совет Света', doc: 'DOC-006' },
+  { group: 'war', title: 'Война на Ирисе', doc: 'DOC-007' }
 ];
 
-// Изображения лежат в images/<folder>/ (имя файла без расширения = name).
-// title / description показываются в боковой панели «ОПИСАНИЕ».
-// description — строка или массив абзацев.
 const images = [
   {
+    group: 'loeffri',
     name: 'image-1',
     number: '001',
     title: 'Сравнение роста и массы',
@@ -51,6 +44,7 @@ const images = [
     ]
   },
   {
+    group: 'loeffri',
     name: 'image-2',
     number: '002',
     title: 'Зарисовка сердца (ядра)',
@@ -59,85 +53,92 @@ const images = [
       'Имеются только зарисовки — предположительные схемы по внешним наблюдениям. Точных данных нет.'
     ]
   },
-  { folder: 'loeffri', name: 'image-3', number: '003', title: 'Архивный фрагмент 003', description: ['...'] },
-  { folder: 'loeffri', name: 'image-4', number: '004', title: 'Архивный фрагмент 004', description: ['...'] },
+  { group: 'loeffri', name: 'image-3', number: '003', title: 'Архивный фрагмент 003', description: ['...'] },
+  { group: 'loeffri', name: 'image-4', number: '004', title: 'Архивный фрагмент 004', description: ['...'] },
 
-  // ---- Ирис: мир и биология (images/iris/) ----
   {
+    group: 'iris',
     name: 'iris-1',
     number: '005',
     title: 'Ирис в галактике IC 1101',
     description: ['Родной мир Морфостеллов — планета в IC 1101.', 'Кольца, ледяные равнины и орбита — рубежи, через которые Хитинархи пытались прорваться.']
   },
   {
+    group: 'iris',
     name: 'iris-2',
     number: '006',
     title: 'Касты Морфостеллов',
     description: ['Три касты: Астралиты (высшая), Илиуссы (средняя), Люксоры (низшая).', 'Астралиты вымерли, Илиуссы почти исчезли, Люксоры — основное население.']
   },
   {
+    group: 'iris',
     name: 'iris-3',
     number: '007',
     title: 'Форма Монокероса',
     description: ['Морфостеллы способны принимать форму Монокероса. Кавалерия в этой форме — элита армии: хвост служит и статусом, и оружием.']
   },
   {
+    group: 'iris',
     name: 'iris-4',
     number: '008',
     title: 'Сектора Ириса',
     description: ['Центр (Аурум), Лёд (Криос), Тепло (Игнис), Звезда (Астра).', 'За каждым сектором закреплён генерал в составе Совета Света.']
   },
 
-  // ---- Эпоха Угасших (images/epoch/) ----
   {
+    group: 'epoch',
     name: 'epoch-1',
     number: '009',
     title: 'День Угасших',
     description: ['Праздник в середине Соляриса. День траура: молчание, синие огни, список вымерших каст.']
   },
   {
+    group: 'epoch',
     name: 'epoch-2',
     number: '010',
     title: 'Алые воды Ириса',
     description: ['После Эпохи Угасших часть вод Ириса стала алой. Вода хранит тепло и позволяет жизни выживать.']
   },
 
-  // ---- Лжи-Матерь (images/lie-mother/) ----
   {
+    group: 'lie-mother',
     name: 'lie-mother-1',
     number: '011',
     title: 'Образ Лжи-Матери',
     description: ['Внешность не детализирована. Образ — противоположность Богини-Матери: тьма, обман, хаос. Возможно, искажённые крылья; возможно, облик меняется.']
   },
   {
+    group: 'lie-mother',
     name: 'lie-mother-2',
     number: '012',
     title: 'Противоположность Богини-Матери',
     description: ['Богиня-Матерь защищала расу миллионы лет, а затем исчезла. Местонахождение и причина неизвестны.']
   },
 
-  // ---- Совет Света (images/council/) ----
   {
+    group: 'council',
     name: 'council-1',
     number: '013',
     title: 'Аурериум',
     description: ['Главное здание столицы Аурума. Здесь собирается Совет Света под защитой Ангелов.']
   },
   {
+    group: 'council',
     name: 'council-2',
     number: '014',
     title: 'Четырнадцать членов Совета',
     description: ['Пять фракций: военная, научная, религиозная, торговая, странствующая.']
   },
 
-  // ---- Война на Ирисе (images/war/) ----
   {
+    group: 'war',
     name: 'war-1',
     number: '015',
     title: 'Хитинархи',
     description: ['Враги Ириса. Корабли выращиваются, а не строятся.']
   },
   {
+    group: 'war',
     name: 'war-2',
     number: '016',
     title: 'Армия Ириса',
@@ -154,7 +155,6 @@ const capitalMap = {
 const documents = [
   {
     id: 'DOC-001',
-    folder: 'loeffri',
     photoDescription: ['...'],
     title: 'Лоеффри (Реплик Эхфанд)',
     date: 'UNKNOWN',
@@ -339,9 +339,9 @@ const documents = [
       }
     ]
   },
+
   {
     id: 'DOC-003',
-    folder: 'iris',
     photoDescription: ['...'],
     title: 'Ирис: мир и биология',
     date: 'UNKNOWN',
@@ -444,10 +444,8 @@ const documents = [
     ]
   },
 
-
   {
     id: 'DOC-004',
-    folder: 'epoch',
     photoDescription: ['...'],
     title: 'Эпоха Угасших',
     date: 'UNKNOWN',
@@ -533,10 +531,8 @@ const documents = [
     ]
   },
 
- 
   {
     id: 'DOC-005',
-    folder: 'lie-mother',
     photoDescription: ['...'],
     title: 'Лжи-Матерь',
     date: 'UNKNOWN',
@@ -612,10 +608,8 @@ const documents = [
     ]
   },
 
-
   {
     id: 'DOC-006',
-    folder: 'council',
     photoDescription: ['...'],
     title: 'Совет Света',
     date: 'UNKNOWN',
@@ -754,10 +748,8 @@ const documents = [
     ]
   },
 
-
   {
     id: 'DOC-007',
-    folder: 'war',
     photoDescription: ['...'],
     title: 'Война на Ирисе',
     date: 'UNKNOWN',
