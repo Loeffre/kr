@@ -44,7 +44,7 @@ const documents = [
           }
         ]
       },
-      blocks: [
+        blocks: [
           { t: 'h', text: 'Материалы' },
           {
             t: 'ul',
