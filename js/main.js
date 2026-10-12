@@ -21,9 +21,50 @@ function add(parent, ...children) {
   return parent;
 }
 
-function renderBlocks(blocks, parent) {
+function isRedacted(doc) {
+  return doc.protected === true && userRole !== 'full';
+}
+
+function redactedBars(text) {
+  const wrap = el('span', 'redacted');
+  wrap.setAttribute('role', 'img');
+  wrap.setAttribute('aria-label', 'Данные скрыты');
+  text.split(/\s+/).filter(Boolean).forEach((word, index) => {
+    if (index > 0) wrap.appendChild(document.createTextNode(' '));
+    const bar = el('span', 'redact-bar');
+    bar.style.width = `${Math.max(2, word.length) * 0.58}em`;
+    wrap.appendChild(bar);
+  });
+  return wrap;
+}
+
+function redactedBlock(block) {
+  if (block.t === 'p') return add(el('p'), redactedBars(block.text));
+  if (block.t === 'h') return add(el('h4', 'doc-subheading'), redactedBars(block.text));
+  if (block.t === 'ul') {
+    const wrap = el('div');
+    if (block.lead) add(wrap, add(el('p'), redactedBars(block.lead)));
+    const list = el('ul');
+    block.items.forEach((item) => add(list, add(el('li'), redactedBars(item))));
+    return add(wrap, list);
+  }
+  if (block.t === 'restricted') {
+    const aside = el('aside', 'restricted-block');
+    add(aside, el('span', 'restricted-tag', 'RESTRICTED // ДАННЫЕ СКРЫТЫ'), add(el('h4'), redactedBars(block.title)));
+    renderBlocks(block.blocks, aside, { redact: true });
+    return aside;
+  }
+  return add(el('p'), redactedBars('RECORD INCOMPLETE DATA'));
+}
+
+function renderBlocks(blocks, parent, ctx = {}) {
   blocks.forEach((block) => {
-    if (block.t === 'p') {
+    const visible = !ctx.redact || ctx.openSection || block.public === true;
+    if (block.t === 'fields') {
+      add(parent, fieldsBlock(block, ctx));
+    } else if (!visible) {
+      add(parent, redactedBlock(block));
+    } else if (block.t === 'p') {
       add(parent, el('p', null, block.text));
     } else if (block.t === 'h') {
       add(parent, el('h4', 'doc-subheading', block.text));
@@ -32,8 +73,6 @@ function renderBlocks(blocks, parent) {
       const list = el('ul');
       block.items.forEach((item) => add(list, el('li', null, item)));
       add(parent, list);
-    } else if (block.t === 'fields') {
-      add(parent, fieldsBlock(block));
     } else if (block.t === 'restricted') {
       add(parent, restrictedBlock(block));
     } else {
@@ -42,11 +81,15 @@ function renderBlocks(blocks, parent) {
   });
 }
 
-function fieldsBlock(block) {
+function fieldsBlock(block, ctx = {}) {
   const card = el('div', 'doc-fields');
   if (block.title) add(card, el('span', 'doc-fields-title', block.title));
   const list = el('dl', 'doc-fields-list');
-  block.items.forEach((item) => add(list, add(el('div', 'doc-field'), el('dt', null, item.label), el('dd', null, item.value))));
+  block.items.forEach((item) => {
+    const open = !ctx.redact || ctx.openSection || item.public === true;
+    const value = open ? el('dd', null, item.value) : add(el('dd'), redactedBars(item.value));
+    add(list, add(el('div', 'doc-field'), el('dt', null, item.label), value));
+  });
   return add(card, list);
 }
 
@@ -55,6 +98,16 @@ function restrictedBlock(block, documentId) {
   add(aside, el('span', 'restricted-tag', documentId ? `RESTRICTED // ${documentId}` : 'RESTRICTED'), el('h4', null, block.title));
   renderBlocks(block.blocks, aside);
   return aside;
+}
+
+function summaryNode(doc) {
+  const p = el('p');
+  if (!isRedacted(doc)) {
+    p.textContent = doc.summary;
+    return p;
+  }
+  if (doc.publicSummary) p.appendChild(document.createTextNode(`${doc.publicSummary} `));
+  return add(p, redactedBars(doc.summary.split(/\s+/).slice(0, 14).join(' ')));
 }
 
 function openDocument(id) {
@@ -70,12 +123,13 @@ function overviewPanel() {
   const open = el('button', 'featured-link', 'OPEN DOCUMENT');
   open.type = 'button';
   open.addEventListener('click', () => openDocument(featured.id));
-  add(box, el('span', 'featured-tag', `LAST RECORD // ${featured.id}`), el('h4', null, featured.title), el('p', null, featured.summary), open);
+  add(box, el('span', 'featured-tag', `LAST RECORD // ${featured.id}`), el('h4', null, featured.title), summaryNode(featured), open);
   return add(wrap, text, box);
 }
 
 function documentsPanel() {
   const current = documents.find((doc) => doc.id === state.documentId) || documents[0];
+  const redacted = isRedacted(current);
   const wrap = el('div', 'documents');
   const list = el('ul', 'doc-list');
   documents.forEach((doc) => {
@@ -89,12 +143,13 @@ function documentsPanel() {
   });
   const article = el('article', 'doc-reader');
   const meta = el('div', 'doc-meta mono');
-  add(meta, el('span', null, current.id), el('span', null, `DATE: ${current.date}`), el('span', null, `CLASS: ${current.classification}`), el('span', null, `STATUS: ${current.status}`));
+  add(meta, el('span', null, current.id), el('span', null, `DATE: ${current.date}`), el('span', null, `CLASS: ${current.classification}`), el('span', null, `STATUS: ${redacted ? 'REDACTED' : current.status}`));
   add(article, meta, el('h3', 'doc-title', current.title));
+  if (redacted) add(article, el('p', 'doc-banner', 'ДОКУМЕНТ ЧАСТИЧНО ЗАСЕКРЕЧЕН // УРОВЕНЬ ДОПУСКА: ОГРАНИЧЕННЫЙ'));
   current.sections.forEach((section) => {
     const block = el('section', 'doc-section');
     add(block, el('h4', 'doc-heading', section.title));
-    renderBlocks(section.blocks, block);
+    renderBlocks(section.blocks, block, { redact: redacted, openSection: section.public === true });
     add(article, block);
   });
   return add(wrap, list, article);
@@ -108,7 +163,7 @@ function recordsPanel() {
   documents.forEach((doc) => {
     const row = el('button', 'record-row');
     row.type = 'button';
-    add(row, el('span', 'mono', doc.id), el('span', null, doc.title), el('span', 'mono', doc.date), el('span', 'mono', doc.status));
+    add(row, el('span', 'mono', doc.id), el('span', null, doc.title), el('span', 'mono', doc.date), el('span', 'mono', isRedacted(doc) ? 'REDACTED' : doc.status));
     row.addEventListener('click', () => openDocument(doc.id));
     add(wrap, row);
   });
@@ -168,6 +223,10 @@ function evidencePanel() {
 
 function restrictedPanel() {
   const wrap = el('div', 'restricted-panel');
+  if (userRole !== 'full') {
+    add(wrap, add(el('aside', 'restricted-block'), el('span', 'restricted-tag', 'ACCESS DENIED'), el('h4', null, 'Доступ к разделу запрещён'), el('p', null, 'Недостаточный уровень допуска.')));
+    return wrap;
+  }
   let found = 0;
   documents.forEach((doc) =>
     doc.sections.forEach((section) =>
